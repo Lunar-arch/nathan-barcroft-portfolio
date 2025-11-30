@@ -5,6 +5,7 @@
   --background-secondary: oklch(0.7418 0.0279 315.53);
   --foreground: oklch(0.2096 0.0371 290.05);
   --foreground-secondary: oklch(0.3096 0.0371 290.05);
+  --accent: oklch(0.2786 0.0579 289.25);
 }
 
 @theme inline {
@@ -12,8 +13,10 @@
   --color-background-secondary: var(--background-secondary);
   --color-foreground: var(--foreground);
   --color-foreground-secondary: var(--foreground-secondary);
+  --color-accent: var(--accent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --default-transition-duration: 300ms;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nathan Barcroft — Portfolio
 
-## Getting Started
+## About
 
-First, run the development server:
+This portfolio showcases my approach to front-end development through the experience itself. Rather than just listing projects, the site demonstrates technical skills through thoughtful interactions, smooth animations, and clean code architecture.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+**Live** at [nathanbarcroft.com](https://nathanbarcroft.com)
+
+
+## Tech Stack
+
+- **Next.js 14** (App Router, TypeScript) — For server-side rendering and type safety
+- **Tailwind CSS** — For fast and maintainable styling
+- **GSAP** — For smooth and performant animations
+
+
+## Key Features
+
+**Performance considerations:**
+- Optimized bundle size and loading strategies
+- Efficient font loading
+- Server components by default and client components only where needed
+
+**Animation approach:**
+- GSAP for smooth interactions
+- Motion used to enhance UX, not distract from content
+- Responsive animations that work across devices
+
+**Code organization:**
+- TypeScript for type safety
+- Component-based architecture
+- Co-located styles with Tailwind
+
+
+
+## Project Structure
+
+```
+app/
+├── page.tsx          # Main landing page
+├── layout.tsx        # Global layout and metadata
+├── components/       # Custom reusable UI components
+└── [pages]/          # Additional sections
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Development
 
-## Learn More
+```powershell
+# Install dependencies
+npm install
 
-To learn more about Next.js, take a look at the following resources:
+# Run development server
+npm run dev
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Build for production
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Design Approach
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The site uses a minimal color palette and clean typography to keep focus on content and interaction. Accessibility was considered, with semantic HTML, ARIA labels, and keyboard navigation support.
+
+
+
+## Deployment
+
+Hosted on Vercel for performance and automatic deployments from the main branch.
+
+
+
+> Built with Next.js, Tailwind CSS, and GSAP.
