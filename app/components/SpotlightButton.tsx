@@ -98,7 +98,7 @@ export default function SpotlightButton2({
       type={rest.type ?? "button"}
     >
       <span
-        aria-hidden
+        aria-hidden="true"
         style={bgStyle}
         className="absolute inset-0"
       />
