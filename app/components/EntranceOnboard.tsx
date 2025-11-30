@@ -49,7 +49,7 @@ export default function EntranceOnboard() {
       onComplete: () => {
         const main = document.querySelector('#main-content') as HTMLElement | null;
         if (main) {
-          main.removeAttribute('aria-hidden');
+          main.removeAttribute('inert');
         }
         gsap.to(overlay, { autoAlpha: 0, duration: 0.4, onComplete: () => setVisible(false) });
       },
@@ -64,9 +64,10 @@ export default function EntranceOnboard() {
     }
 
     // while overlay is visible, hide the main content from assistive tech
+    // use inert to prevent focus on hidden elements (fixes ARIA hidden focusable violation)
     const mainEl = document.querySelector('#main-content') as HTMLElement | null;
     if (mainEl) {
-      mainEl.setAttribute('aria-hidden', 'true');
+      mainEl.setAttribute('inert', '');
       // start main visually hidden; we'll fade it in after the grid animation
       gsap.set(mainEl, { autoAlpha: 0 });
     }
@@ -89,7 +90,7 @@ export default function EntranceOnboard() {
     return () => {
       tl.kill();
       const main = document.querySelector('#main-content') as HTMLElement | null;
-      if (main) main.removeAttribute('aria-hidden');
+      if (main) main.removeAttribute('inert');
     };
   }, []);
 
@@ -103,7 +104,7 @@ export default function EntranceOnboard() {
     if (overlay) gsap.set(overlay, { autoAlpha: 0 });
     const main = document.querySelector('#main-content') as HTMLElement | null;
     if (main) {
-      main.removeAttribute('aria-hidden');
+      main.removeAttribute('inert');
       // ensure main is visible immediately when skipping
       gsap.set(main, { autoAlpha: 1 });
     }
