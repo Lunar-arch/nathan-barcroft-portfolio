@@ -35,7 +35,7 @@ export default function Home() {
               <h1 className="mb-6 text-4xl leading-tight tracking-tight text-foreground sm:text-5xl">
                 I build{' '}
                 <TextSpotlight
-                  text="beautiful,"
+                  text="hi jonah,"
                   className="inline-block font-semibold bg-foreground-secondary/30"
                   color="rgba(99,102,241,0.95)"
                 />{' '}
