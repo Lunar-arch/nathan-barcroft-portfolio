@@ -8,7 +8,7 @@ import { gsap } from 'gsap';
 type MobileMenuProps = {
 	open: boolean;
 	onClose: () => void;
-	triggerRef?: RefObject<HTMLButtonElement>;
+	triggerRef?: RefObject<HTMLButtonElement | null>;
 };
 
 const links = [

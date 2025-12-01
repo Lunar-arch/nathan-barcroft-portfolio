@@ -7,7 +7,7 @@ import { Menu, X } from 'lucide-react';
 type HeaderProps = {
 	mobileOpen: boolean;
 	onToggleMobileMenu: () => void;
-	menuToggleRef?: RefObject<HTMLButtonElement>;
+	menuToggleRef?: RefObject<HTMLButtonElement | null>;
 };
 
 const Header = ({ mobileOpen, onToggleMobileMenu, menuToggleRef }: HeaderProps) => {
