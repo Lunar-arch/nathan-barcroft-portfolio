@@ -5,7 +5,8 @@
   "scripts": {
     "tailwind": "npx @tailwindcss/cli -i ./app/globals.css -o ./app/output.css",
     "tailwind-watch": "npx @tailwindcss/cli -i ./app/globals.css -o ./app/output.css --watch",
-    "dev": "npm run tailwind && next dev",
+    "dev": "concurrently \"npm run tailwind-watch\" \"next dev\"",
+    "dev:start": "npm install && ncu -i",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -13,19 +14,23 @@
   "dependencies": {
     "@gsap/react": "^2.1.2",
     "@tailwindcss/cli": "^4.1.17",
+    "concurrently": "^9.2.1",
     "gsap": "^3.13.0",
-    "next": "16.0.4",
+    "lucide-react": "^0.555.0",
+    "next": "16.0.6",
+    "npm-check-updates": "^19.1.2",
+    "prettier": "^3.7.3",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "baseline-browser-mapping": "^2.8.32",
     "eslint": "^9",
-    "eslint-config-next": "16.0.4",
+    "eslint-config-next": "16.0.6",
     "tailwindcss": "^4.1.17",
     "typescript": "^5"
   }

@@ -19,8 +19,22 @@ export default function EntranceOnboard() {
 
     // Respect user preference for reduced motion: skip the intro
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setVisible(false);
-      return;
+      let canceled = false;
+      const callback = () => {
+        if (!canceled) setVisible(false);
+      };
+      const canAnimateFrame = typeof window.requestAnimationFrame === 'function';
+      const handleRequest = canAnimateFrame
+        ? window.requestAnimationFrame(callback)
+        : window.setTimeout(callback, 0);
+      return () => {
+        canceled = true;
+        if (canAnimateFrame && typeof window.cancelAnimationFrame === 'function') {
+          window.cancelAnimationFrame(handleRequest as number);
+        } else {
+          window.clearTimeout(handleRequest as number);
+        }
+      };
     }
 
     const header = document.querySelector("#site-header");
