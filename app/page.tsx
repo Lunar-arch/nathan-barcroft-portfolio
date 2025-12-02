@@ -12,16 +12,18 @@ import MobileMenu from "./components/MobileMenu";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 
-// Import GSAP plugins
+// Import GSAP plugins (free plugins only for cross-browser compatibility)
 import { Flip } from "gsap/Flip";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
-import { SplitText } from "gsap/SplitText";
 import { TextPlugin } from "gsap/TextPlugin";
 
-// Register GSAP plugins
-gsap.registerPlugin(useGSAP,Flip,ScrollTrigger,ScrollSmoother,ScrollToPlugin,SplitText,TextPlugin);
+// Register GSAP plugins with error handling for cross-browser compatibility
+try {
+  gsap.registerPlugin(useGSAP, Flip, ScrollTrigger, ScrollToPlugin, TextPlugin);
+} catch {
+  console.warn("GSAP plugins could not be registered. CSS fallback animations will be used.");
+}
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
