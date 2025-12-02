@@ -1,20 +1,10 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
+import { gsap, isGsapAvailable } from "../../lib/gsapUtils";
 
 // store measured target widths without attaching properties to DOM nodes
 const entranceTargetWidths = new WeakMap<HTMLElement, string>();
-
-// Helper to check if GSAP is working properly
-function isGsapAvailable(): boolean {
-  try {
-    // Test if GSAP can perform basic operations
-    return typeof gsap !== 'undefined' && typeof gsap.set === 'function';
-  } catch {
-    return false;
-  }
-}
 
 // CSS fallback animation function
 function runCssFallbackAnimation(
@@ -212,9 +202,9 @@ export default function EntranceOnboard() {
         const main = document.querySelector('#main-content') as HTMLElement | null;
         if (main) main.removeAttribute('inert');
       };
-    } catch {
+    } catch (error) {
       // GSAP failed, use CSS fallback
-      console.warn("GSAP animation failed, using CSS fallback");
+      console.warn("GSAP animation failed, using CSS fallback", error);
       usingCssFallback.current = true;
       runCssFallbackAnimation(overlay, grid, setVisible);
     }

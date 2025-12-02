@@ -3,16 +3,7 @@
 import type { RefObject } from 'react';
 import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
-import { gsap } from 'gsap';
-
-// Helper to check if GSAP is working properly
-function isGsapAvailable(): boolean {
-  try {
-    return typeof gsap !== 'undefined' && typeof gsap.set === 'function';
-  } catch {
-    return false;
-  }
-}
+import { gsap, isGsapAvailable } from '../../lib/gsapUtils';
 
 type MobileMenuProps = {
 	open: boolean;
