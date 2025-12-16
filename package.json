@@ -18,7 +18,7 @@
     "geist": "^1.5.1",
     "gsap": "^3.13.0",
     "lucide-react": "^0.555.0",
-    "next": "16.0.6",
+    "next": "16.0.10",
     "npm-check-updates": "^19.1.2",
     "prettier": "^3.7.3",
     "react": "19.2.0",
@@ -31,7 +31,7 @@
     "@types/react-dom": "^19",
     "baseline-browser-mapping": "^2.8.32",
     "eslint": "^9",
-    "eslint-config-next": "16.0.6",
+    "eslint-config-next": "16.0.10",
     "tailwindcss": "^4.1.17",
     "typescript": "^5"
   }
