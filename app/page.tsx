@@ -15,13 +15,11 @@ import { useGSAP } from "@gsap/react";
 // Import GSAP plugins
 import { Flip } from "gsap/Flip";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
-import { SplitText } from "gsap/SplitText";
 import { TextPlugin } from "gsap/TextPlugin";
 
 // Register GSAP plugins
-gsap.registerPlugin(useGSAP,Flip,ScrollTrigger,ScrollSmoother,ScrollToPlugin,SplitText,TextPlugin);
+gsap.registerPlugin(useGSAP, Flip, ScrollTrigger, ScrollToPlugin, TextPlugin);
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
