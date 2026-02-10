@@ -1,140 +1,90 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
+import React, { useEffect, useMemo, useState } from "react";
+import { motion, useAnimation, useReducedMotion } from "motion/react";
 
-// store measured target widths without attaching properties to DOM nodes
-const entranceTargetWidths = new WeakMap<HTMLElement, string>();
+type EntranceOnboardProps = {
+  onReveal: () => void;
+  onComplete: () => void;
+  onSkip: () => void;
+};
 
-export default function EntranceOnboard() {
-  const overlayRef = useRef<HTMLDivElement | null>(null);
-  const gridRef = useRef<HTMLDivElement | null>(null);
+export default function EntranceOnboard({ onReveal, onComplete, onSkip }: EntranceOnboardProps) {
+  const reduceMotion = useReducedMotion();
+  const overlayControls = useAnimation();
+  const cellControls = useAnimation();
   const [visible, setVisible] = useState(true);
-  const tlRef = useRef<gsap.core.Timeline | null>(null);
+  const easeOut = [0.22, 1, 0.36, 1] as const;
+  const easeIn = [0.4, 0, 1, 1] as const;
 
-  useEffect(() => {
-    const overlay = overlayRef.current;
-    const grid = gridRef.current;
-    if (!overlay || !grid) return;
+  const cols = 7;
+  const rows = 7;
+  const total = cols * rows;
+  const centerIndex = Math.floor(total / 2);
+  const cells = useMemo(() => Array.from({ length: total }, (_, i) => i), [total]);
 
-    // Respect user preference for reduced motion: skip the intro
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      let canceled = false;
-      const callback = () => {
-        if (!canceled) setVisible(false);
-      };
-      const canAnimateFrame = typeof window.requestAnimationFrame === 'function';
-      const handleRequest = canAnimateFrame
-        ? window.requestAnimationFrame(callback)
-        : window.setTimeout(callback, 0);
-      return () => {
-        canceled = true;
-        if (canAnimateFrame && typeof window.cancelAnimationFrame === 'function') {
-          window.cancelAnimationFrame(handleRequest as number);
-        } else {
-          window.clearTimeout(handleRequest as number);
-        }
-      };
-    }
-
-    const header = document.querySelector("#site-header");
-    const headerChildren = header ? Array.from(header.querySelectorAll("*")) : [];
-
-    // prepare grid cells
-    const cells = Array.from(grid.children) as HTMLElement[];
-
-    gsap.set(overlay, { autoAlpha: 1 });
-    if (header && header instanceof HTMLElement) {
-
-      const targetWidth = "72rem"; // Tailwind max-w-6xl
-
-      gsap.set(header, { maxWidth: "48px", overflow: "hidden" });
-      header.classList.remove("max-w-12");
-      header.classList.add("max-w-6xl");
-      gsap.set(headerChildren, { opacity: 0 });
-
-      // store target in WeakMap instead of attaching to the element
-      entranceTargetWidths.set(header, targetWidth);
-    }
-    gsap.set(cells, { scale: 1, opacity: 1 });
-
-    const tl = gsap.timeline({
-      defaults: { ease: "power2.out" },
-      onComplete: () => {
-        const main = document.querySelector('#main-content') as HTMLElement | null;
-        if (main) {
-          main.removeAttribute('inert');
-        }
-        gsap.to(overlay, { autoAlpha: 0, duration: 0.4, onComplete: () => setVisible(false) });
-      },
-    });
-    tlRef.current = tl;
-
-    // animate header expansion using maxWidth (from 12px to measured width)
-    if (header && header instanceof HTMLElement) {
-      const targetWidth = entranceTargetWidths.get(header) || "72rem";
-      tl.to(header, { maxWidth: targetWidth, duration: 0.8, ease: "power2.out" })
-        .to(headerChildren, { opacity: 1, duration: 0.45, stagger: 0.06 }, "-=.35");
-    }
-
-    // while overlay is visible, hide the main content from assistive tech
-    // use inert to prevent focus on hidden elements (fixes ARIA hidden focusable violation)
-    const mainEl = document.querySelector('#main-content') as HTMLElement | null;
-    if (mainEl) {
-      mainEl.setAttribute('inert', '');
-      // start main visually hidden; we'll fade it in after the grid animation
-      gsap.set(mainEl, { autoAlpha: 0 });
-    }
-
-    // staggered exit of grid squares: scale down and fade
-    tl.to(cells, {
+  const cellVariants = {
+    enter: { scale: 1, opacity: 1 },
+    exit: (index: number) => ({
       scale: 0.6,
       opacity: 0,
-      duration: 0.6,
-      stagger: { each: 0.03, from: "center" },
-      ease: "power2.in",
-    }, ">+0.12");
+      transition: {
+        duration: 0.6,
+        ease: easeIn,
+        delay: Math.abs(index - centerIndex) * 0.03,
+      },
+    }),
+  };
 
-    // fade main content in after the grid squares have animated out
-    if (mainEl) {
-      tl.to(mainEl, { autoAlpha: 1, duration: 0.45, ease: "power2.out" }, ">+0.02");
+  useEffect(() => {
+    if (reduceMotion) {
+      onReveal();
+      onComplete();
+      setVisible(false);
+      return;
     }
-	header?.classList.remove("max-w-12");
 
-    return () => {
-      tl.kill();
-      const main = document.querySelector('#main-content') as HTMLElement | null;
-      if (main) main.removeAttribute('inert');
+    let canceled = false;
+    const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+    const run = async () => {
+      await wait(1020);
+      if (canceled) return;
+      await cellControls.start("exit");
+      if (canceled) return;
+      onReveal();
+      await overlayControls.start({ opacity: 0, transition: { duration: 0.4, ease: easeOut } });
+      if (canceled) return;
+      setVisible(false);
+      onComplete();
     };
-  }, []);
+
+    run();
+    return () => {
+      canceled = true;
+      cellControls.stop();
+      overlayControls.stop();
+    };
+  }, [cellControls, overlayControls, onComplete, onReveal, reduceMotion]);
 
   const handleSkip = () => {
-    // kill timeline and hide overlay immediately
-    if (tlRef.current) {
-      tlRef.current.kill();
-      tlRef.current = null;
-    }
-    const overlay = overlayRef.current;
-    if (overlay) gsap.set(overlay, { autoAlpha: 0 });
-    const main = document.querySelector('#main-content') as HTMLElement | null;
-    if (main) {
-      main.removeAttribute('inert');
-      // ensure main is visible immediately when skipping
-      gsap.set(main, { autoAlpha: 1 });
-    }
+    cellControls.stop();
+    overlayControls.stop();
+    onSkip();
     setVisible(false);
   };
 
   if (!visible) return null;
 
-  // build 7x7 grid
-  const cols = 7;
-  const rows = 7;
-  const total = cols * rows;
-  const cells = Array.from({ length: total }, (_, i) => i);
-
   return (
-    <div ref={overlayRef} role="dialog" aria-modal="true" aria-label="Intro animation" className="fixed inset-0 z-40 flex items-center justify-center bg-transparent">
+    <motion.div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Intro animation"
+      className="fixed inset-0 z-40 flex items-center justify-center bg-transparent"
+      initial={{ opacity: 1 }}
+      animate={overlayControls}
+    >
       <button
         type="button"
         onClick={handleSkip}
@@ -143,15 +93,19 @@ export default function EntranceOnboard() {
       >
         Skip intro
       </button>
-      <div ref={gridRef} className="absolute inset-0 grid grid-cols-7 grid-rows-7">
-        {cells.map((i) => (
-          <div
+      <div className="absolute inset-0 grid grid-cols-7 grid-rows-7">
+        {cells.map(i => (
+          <motion.div
             key={i}
             className="w-full h-full"
             style={{ backgroundColor: "var(--accent)" }}
+            custom={i}
+            variants={cellVariants}
+            initial="enter"
+            animate={cellControls}
           />
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }

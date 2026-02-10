@@ -1,24 +1,60 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 interface TextSpotlightProps {
   text: string;
   className?: string;
-  color?: string;
-  /** optional radius in pixels; if omitted, computed from window width on client */
+  colors?: ColorStop[];
   size?: number; // px radius of spotlight
   smoothing?: number; // 0-1
 }
+type ColorStop = {
+  color: string;
+  percent: `${number}%`;
+  isClass?: boolean;
+};
+
+const isTailwindClass = (value: string) => value.includes("bg-") || value.includes("text-");
+
+const resolveComputedColor = (el: HTMLSpanElement | null, fallback: string, mode: "color" | "background") => {
+  if (!el) return fallback;
+  const styles = getComputedStyle(el);
+  return mode === "background" ? styles.backgroundColor : styles.color;
+};
 
 export default function TextSpotlight({
   text,
   className = "",
-  color = "rgba(99,102,241,0.95)",
-  size = 220,
+  colors,
+  size = 300,
   smoothing = 0.16,
 }: TextSpotlightProps) {
   const ref = useRef<HTMLSpanElement | null>(null);
+  const swatchRefs = useRef<Array<HTMLSpanElement | null>>([]);
+
+  const normalizedColors = useMemo<ColorStop[]>(() => {
+    if (colors && colors.length > 0) return colors;
+    return [
+      { color: "rgba(99,102,241,0.95)", percent: "40%" },
+      { color: "transparent", percent: "60%" },
+      { color: "transparent", percent: "80%" },
+    ];
+  }, [colors]);
+
+  const [resolved, setResolved] = useState<string[]>(
+    normalizedColors.map(c => c.color)
+  );
+
+  useLayoutEffect(() => {
+    const next = normalizedColors.map((c, i) => {
+      const usesClass = c.isClass ?? isTailwindClass(c.color);
+      if (!usesClass) return c.color;
+      const mode = c.color.includes("bg-") ? "background" : "color";
+      return resolveComputedColor(swatchRefs.current[i], c.color, mode);
+    });
+    setResolved(next);
+  }, [normalizedColors]);
 
   useEffect(() => {
     const el = ref.current;
@@ -55,7 +91,10 @@ export default function TextSpotlight({
       currentY = lerp(currentY, targetY, smoothing);
 
       const used = effectiveSize ?? 220;
-      const grad = `radial-gradient(circle ${used}px at ${currentX}px ${currentY}px, ${color} 0%, ${color} 40%, transparent 60%)`;
+      const stops = normalizedColors
+        .map((c, i) => `${resolved[i] ?? c.color} ${c.percent}`)
+        .join(", ");
+      const grad = `radial-gradient(circle ${used}px at ${currentX}px ${currentY}px, ${stops})`;
       el.style.backgroundImage = grad;
 
       requestAnimationFrame(render);
@@ -74,11 +113,27 @@ export default function TextSpotlight({
       window.removeEventListener("pointermove", onPointer);
       window.removeEventListener("mousemove", onMouse);
     };
-  }, [color, size, smoothing]);
+  }, [normalizedColors, resolved, size, smoothing]);
 
   return (
-    <span ref={ref} className={className} aria-hidden={false}>
-      {text}
+    <span className="relative inline-flex">
+      {normalizedColors.map((c, i) => {
+        const usesClass = c.isClass ?? isTailwindClass(c.color);
+        return (
+          <span
+            key={`${c.color}-${i}`}
+            ref={el => {
+              swatchRefs.current[i] = el;
+            }}
+            className={`${usesClass ? c.color : ""} sr-only`}
+            style={!usesClass ? { color: c.color } : undefined}
+            aria-hidden="true"
+          />
+        );
+      })}
+      <span ref={ref} className={className} aria-hidden={false}>
+        {text}
+      </span>
     </span>
   );
 }

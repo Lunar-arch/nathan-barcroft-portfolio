@@ -1,39 +1,66 @@
 "use client";
 
 //Component imports
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import Header from "./components/Header";
 import EntranceOnboard from "./components/EntranceOnboard";
 import TextSpotlight from "./components/TextSpotlight";
 import CTAs from "./components/CTAs";
 import MobileMenu from "./components/MobileMenu";
-
-// Import GSAP
-import { gsap } from "gsap";
-import { useGSAP } from "@gsap/react";
-
-// Import GSAP plugins
-import { Flip } from "gsap/Flip";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ScrollToPlugin } from "gsap/ScrollToPlugin";
-import { TextPlugin } from "gsap/TextPlugin";
-
-// Register GSAP plugins
-gsap.registerPlugin(useGSAP, Flip, ScrollTrigger, ScrollToPlugin, TextPlugin);
+import { motion, useReducedMotion } from "motion/react";
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const toggleMobileMenu = useCallback(() => setMobileMenuOpen(open => !open), []);
   const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
   const menuToggleRef = useRef<HTMLButtonElement | null>(null);
+  const reduceMotion = useReducedMotion();
+  const [introRevealed, setIntroRevealed] = useState(reduceMotion);
+  const [introComplete, setIntroComplete] = useState(reduceMotion);
+  const [introSkipped, setIntroSkipped] = useState(false);
+  const easeOut = [0.22, 1, 0.36, 1] as const;
 
-  	return (
-  		<>
-  			<MobileMenu open={mobileMenuOpen} onClose={closeMobileMenu} triggerRef={menuToggleRef} />
-  			<EntranceOnboard />
-  			<div className="relative flex min-h-screen items-center justify-center bg-background font-sans">
-  				<Header mobileOpen={mobileMenuOpen} onToggleMobileMenu={toggleMobileMenu} menuToggleRef={menuToggleRef} />
-  				<main id="main-content" className="relative z-10 w-full max-w-5xl md:px-12 lg:px-6 px-6 py-24" tabIndex={-1}>
+  const mainAnimation = useMemo(() => {
+    if (!introRevealed) {
+      return { opacity: 0 };
+    }
+    return {
+      opacity: 1,
+      transition: reduceMotion || introSkipped
+        ? { duration: 0 }
+        : { duration: 0.45, ease: easeOut, delay: 0.02 },
+    };
+  }, [introRevealed, introSkipped, reduceMotion, easeOut]);
+
+  return (
+    <>
+      <MobileMenu open={mobileMenuOpen} onClose={closeMobileMenu} triggerRef={menuToggleRef} />
+      {!introComplete && (
+        <EntranceOnboard
+          onReveal={() => setIntroRevealed(true)}
+          onComplete={() => setIntroComplete(true)}
+          onSkip={() => {
+            setIntroSkipped(true);
+            setIntroRevealed(true);
+            setIntroComplete(true);
+          }}
+        />
+      )}
+      <div className="relative flex min-h-screen items-center justify-center bg-background font-sans">
+        <Header
+          mobileOpen={mobileMenuOpen}
+          onToggleMobileMenu={toggleMobileMenu}
+          menuToggleRef={menuToggleRef}
+        />
+        <motion.main
+          id="main-content"
+          className="relative z-10 w-full max-w-5xl md:px-12 lg:px-6 px-6 py-24"
+          tabIndex={-1}
+          inert={!introRevealed}
+          aria-hidden={!introRevealed}
+          initial={{ opacity: 0 }}
+          animate={mainAnimation}
+        >
           <section className="mx-auto flex flex-col-reverse items-center gap-12 md:flex-row md:items-center">
             <div className="w-full md:w-2/3">
               <p className="mb-4 text-sm font-medium text-foreground-secondary">
@@ -45,7 +72,11 @@ export default function Home() {
                 <TextSpotlight
                   text="beautiful,"
                   className="inline-block font-semibold bg-foreground-secondary/30"
-                  color="rgba(99,102,241,0.95)"
+                    colors={[
+                      { color: "bg-blue-300", percent: "25%", isClass: true },
+                      { color: "bg-indigo-600", percent: "70%", isClass: true },
+                      { color: "bg-purple-700", percent: "100%", isClass: true },
+                    ]}
                 />{' '}
                 accessible web experiences
               </h1>
@@ -62,7 +93,7 @@ export default function Home() {
               </div>
             </div>
           </section>
-        </main>
+        </motion.main>
       </div>
     </>
   );

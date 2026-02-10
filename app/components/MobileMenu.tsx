@@ -3,7 +3,7 @@
 import type { RefObject } from 'react';
 import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
-import { gsap } from 'gsap';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 
 type MobileMenuProps = {
 	open: boolean;
@@ -21,37 +21,11 @@ const dialogId = 'mobile-menu-dialog';
 const labelId = 'mobile-menu-heading';
 
 const MobileMenu = ({ open, onClose, triggerRef }: MobileMenuProps) => {
-	const overlayRef = useRef<HTMLDivElement | null>(null);
 	const itemsRef = useRef<Array<HTMLAnchorElement | null>>([]);
-	const tlRef = useRef<gsap.core.Timeline | null>(null);
 	const firstLinkRef = useRef<HTMLAnchorElement | null>(null);
-
-	useEffect(() => {
-		const overlay = overlayRef.current;
-		if (!overlay) return;
-
-		const menuItems = itemsRef.current.filter(Boolean) as HTMLElement[];
-
-		gsap.set(overlay, { xPercent: 100, autoAlpha: 0, pointerEvents: 'none' });
-
-		const tl = gsap.timeline({ paused: true });
-		tl.to(overlay, { xPercent: 0, autoAlpha: 1, pointerEvents: 'auto', duration: 0.35, ease: 'power3.out' })
-			.fromTo(
-				menuItems,
-				{ x: 24, autoAlpha: 0 },
-				{ x: 0, autoAlpha: 1, stagger: 0.08, duration: 0.35, ease: 'power3.out' },
-				'<'
-			);
-
-		tlRef.current = tl;
-	}, []);
-
-	useEffect(() => {
-		const tl = tlRef.current;
-		if (!tl) return;
-		if (open) tl.play();
-		else tl.reverse();
-	}, [open]);
+	const reduceMotion = useReducedMotion();
+	const easeOut = [0.22, 1, 0.36, 1] as const;
+	const easeIn = [0.4, 0, 1, 1] as const;
 
 	useEffect(() => {
 		if (open) {
@@ -75,47 +49,72 @@ const MobileMenu = ({ open, onClose, triggerRef }: MobileMenuProps) => {
 	}, [open, onClose]);
 
 	return (
-		<div
-			ref={overlayRef}
-			id={dialogId}
-			className="sm:hidden fixed inset-0 bg-accent/75 backdrop-blur-sm z-60 p-6 flex flex-col pt-20 opacity-0 invisible pointer-events-none"
-			role="dialog"
-			aria-modal="true"
-			aria-hidden={!open}
-			aria-labelledby={labelId}
-			tabIndex={-1}
-		>
-			<div className="flex items-center justify-between mb-6">
-				<p id={labelId} className="sr-only">
-					Mobile navigation menu
-				</p>
-				<button
-					type="button"
-					className="rounded-md p-2 text-foreground/90 hover:bg-background/30 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
-					onClick={onClose}
+		<AnimatePresence>
+			{open && (
+				<motion.div
+					id={dialogId}
+					className="sm:hidden fixed inset-0 bg-accent/75 backdrop-blur-sm z-60 p-6 flex flex-col pt-20"
+					role="dialog"
+					aria-modal="true"
+					aria-hidden={!open}
+					aria-labelledby={labelId}
+					tabIndex={-1}
+					initial={{ x: '100%', opacity: 0 }}
+					animate={{ x: 0, opacity: 1, transition: reduceMotion ? { duration: 0 } : { duration: 0.35, ease: easeOut } }}
+					exit={{ x: '100%', opacity: 0, transition: reduceMotion ? { duration: 0 } : { duration: 0.25, ease: easeIn } }}
 				>
-					<span className="sr-only">Close navigation menu</span>
-					<X size={18} aria-hidden="true" />
-				</button>
-			</div>
+					<div className="flex items-center justify-between mb-6">
+						<p id={labelId} className="sr-only">
+							Mobile navigation menu
+						</p>
+						<button
+							type="button"
+							className="rounded-md p-2 text-foreground/90 hover:bg-background/30 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+							onClick={onClose}
+						>
+							<span className="sr-only">Close navigation menu</span>
+							<X size={18} aria-hidden="true" />
+						</button>
+					</div>
 
-			<nav className="flex flex-col gap-4 mt-2" aria-label="Primary mobile navigation">
-				{links.map((link, i) => (
-					<a
-						key={link.href}
-						href={link.href}
-						ref={el => {
-							itemsRef.current[i] = el;
-							if (i === 0) firstLinkRef.current = el;
+					<motion.nav
+						className="flex flex-col gap-4 mt-2"
+						aria-label="Primary mobile navigation"
+						initial="hidden"
+						animate="visible"
+						variants={{
+							hidden: {},
+							visible: {
+								transition: reduceMotion ? { staggerChildren: 0 } : { staggerChildren: 0.08 },
+							},
 						}}
-						onClick={onClose}
-						className="text-lg opacity-0"
 					>
-						{link.label}
-					</a>
-				))}
-			</nav>
-		</div>
+						{links.map((link, i) => (
+							<motion.a
+								key={link.href}
+								href={link.href}
+								ref={el => {
+									itemsRef.current[i] = el;
+									if (i === 0) firstLinkRef.current = el;
+								}}
+								onClick={onClose}
+								className="text-lg"
+								variants={{
+									hidden: { x: 24, opacity: 0 },
+									visible: {
+										x: 0,
+										opacity: 1,
+										transition: reduceMotion ? { duration: 0 } : { duration: 0.35, ease: easeOut },
+									},
+								}}
+							>
+								{link.label}
+							</motion.a>
+						))}
+					</motion.nav>
+				</motion.div>
+			)}
+		</AnimatePresence>
 	);
 };
 
