@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useResolvedTailwindColors } from "../../lib/useResolvedTailwindColors";
 import { cn } from '@/lib/utils'
@@ -70,6 +70,14 @@ export default function SpotlightButton({
     setHaloPosition({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
   };
 
+  const setSpotlightCenter = () => {
+    if (!btnRef.current) return;
+    const rect = btnRef.current.getBoundingClientRect();
+    const center = { x: rect.width / 2, y: rect.height / 2 };
+    targetRef.current = center;
+    currentRef.current = center;
+  };
+
   const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (!btnRef.current || isFocused) return;
     const rect = btnRef.current.getBoundingClientRect();
@@ -89,6 +97,7 @@ export default function SpotlightButton({
     setOpacity(focusOpacity);
     setHaloActive(true);
     updateHaloPosition();
+    setSpotlightCenter();
     if (btnRef.current) {
       const rect = btnRef.current.getBoundingClientRect();
       targetRef.current = { x: rect.width / 2, y: rect.height / 2 };
@@ -107,6 +116,7 @@ export default function SpotlightButton({
     setOpacity(hoverOpacity);
     setHaloActive(true);
     updateHaloPosition();
+    setSpotlightCenter();
     if (onMouseEnter) onMouseEnter(e);
   };
 
@@ -121,6 +131,10 @@ export default function SpotlightButton({
     setPortalNode(document.getElementById(portalId));
   }, [portalId]);
 
+  useLayoutEffect(() => {
+    setSpotlightCenter();
+  }, []);
+
   useEffect(() => {
     if (!haloActive) return;
     updateHaloPosition();
@@ -134,7 +148,7 @@ export default function SpotlightButton({
     };
   }, [haloActive]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = bgRef.current;
     if (!el) return;
 

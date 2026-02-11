@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useLayoutEffect, useMemo, useRef } from "react";
 import { useResolvedTailwindColors } from "../../lib/useResolvedTailwindColors";
 
 interface TextSpotlightProps {
@@ -40,7 +40,7 @@ export default function TextSpotlight({
   );
   const { resolvedColors, swatches } = useResolvedTailwindColors(colorTokens);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -62,6 +62,16 @@ export default function TextSpotlight({
       // position relative to element
       targetX = clientX - rect.left;
       targetY = clientY - rect.top;
+    };
+
+    const setCenter = () => {
+      const rect = el.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      targetX = centerX;
+      targetY = centerY;
+      currentX = centerX;
+      currentY = centerY;
     };
 
     // compute effective size on client if caller didn't provide one
@@ -86,9 +96,13 @@ export default function TextSpotlight({
 
     const onPointer = (e: PointerEvent) => updateTarget(e.clientX, e.clientY);
     const onMouse = (e: MouseEvent) => updateTarget(e.clientX, e.clientY);
+    const onEnter = (e: PointerEvent) => updateTarget(e.clientX, e.clientY);
 
     window.addEventListener("pointermove", onPointer);
     window.addEventListener("mousemove", onMouse);
+    el.addEventListener("pointerenter", onEnter);
+
+    setCenter();
 
     // start loop
     requestAnimationFrame(render);
@@ -96,6 +110,7 @@ export default function TextSpotlight({
     return () => {
       window.removeEventListener("pointermove", onPointer);
       window.removeEventListener("mousemove", onMouse);
+      el.removeEventListener("pointerenter", onEnter);
     };
   }, [normalizedColors, resolvedColors, size, smoothing]);
 

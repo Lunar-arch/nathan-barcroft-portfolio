@@ -9,9 +9,11 @@ type HeaderProps = {
 	mobileOpen: boolean;
 	onToggleMobileMenu: () => void;
 	menuToggleRef?: RefObject<HTMLButtonElement | null>;
+	progress?: number;
+	progressVisible?: boolean;
 };
 
-const Header = ({ mobileOpen, onToggleMobileMenu, menuToggleRef }: HeaderProps) => {
+const Header = ({ mobileOpen, onToggleMobileMenu, menuToggleRef, progress = 0, progressVisible = false }: HeaderProps) => {
 	const reduceMotion = useReducedMotion();
 	const easeOut = [0.22, 1, 0.36, 1] as const;
 	const headerVariants = {
@@ -49,6 +51,19 @@ const Header = ({ mobileOpen, onToggleMobileMenu, menuToggleRef }: HeaderProps) 
 				initial="collapsed"
 				animate="expanded"
 			>
+				<motion.div
+					className="absolute inset-x-0 bottom-0 h-[4px]"
+					animate={{ opacity: progressVisible ? 1 : 0 }}
+					transition={reduceMotion ? { duration: 0 } : { duration: 0.35, ease: easeOut }}
+				>
+					<div className="h-full w-full bg-transparent">
+						<motion.div
+							className="h-full bg-blue-500"
+							animate={{ width: `${Math.max(0, Math.min(100, progress))}%` }}
+							transition={reduceMotion ? { duration: 0 } : { duration: 0.5, ease: easeOut }}
+						/>
+					</div>
+				</motion.div>
 				<motion.div
 					className="w-full h-full flex flex-row items-center justify-between"
 					variants={containerVariants}

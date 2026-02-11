@@ -1,7 +1,7 @@
 "use client";
 
 //Component imports
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Header from "./components/Header";
 import EntranceOnboard from "./components/EntranceOnboard";
 import TextSpotlight from "./components/TextSpotlight";
@@ -18,7 +18,76 @@ export default function Home() {
   const [introRevealed, setIntroRevealed] = useState(reduceMotion);
   const [introComplete, setIntroComplete] = useState(reduceMotion);
   const [introSkipped, setIntroSkipped] = useState(false);
+  const [progressTarget, setProgressTarget] = useState(0);
+  const [progressReady, setProgressReady] = useState(false);
+  const [progressValue, setProgressValue] = useState(0);
+  const progressTargetRef = useRef(0);
+  const progressValueRef = useRef(0);
   const easeOut = [0.22, 1, 0.36, 1] as const;
+  useEffect(() => {
+    progressTargetRef.current = progressTarget;
+  }, [progressTarget]);
+
+  useEffect(() => {
+    let rafId = 0;
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+    const tick = () => {
+      const target = progressTargetRef.current;
+      const current = progressValueRef.current;
+      const next = lerp(current, target, 0.08);
+      const clamped = Math.max(0, Math.min(100, next));
+      const snapped = target >= 100 && clamped >= 95 ? 100 : clamped;
+      progressValueRef.current = snapped;
+      setProgressValue(snapped);
+
+      if (!progressReady && target >= 100 && snapped >= 100) {
+        setProgressReady(true);
+      }
+
+      rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [progressReady]);
+
+  useEffect(() => {
+    if (progressReady) return;
+    const intervalId = window.setInterval(() => {
+      setProgressTarget(prev => {
+        if (prev >= 100) return prev;
+        return Math.min(88, prev + 0.35);
+      });
+    }, 180);
+    return () => window.clearInterval(intervalId);
+  }, [progressReady]);
+
+  useEffect(() => {
+    let canceled = false;
+    const waitForReady = async () => {
+      if ("fonts" in document) {
+        try {
+          await (document as Document & { fonts: FontFaceSet }).fonts.ready;
+        } catch {
+          // Ignore font readiness errors to avoid blocking.
+        }
+      }
+      await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      if (canceled) return;
+      setProgressTarget(100);
+    };
+
+    const safetyTimer = window.setTimeout(() => {
+      if (!canceled) setProgressTarget(100);
+    }, 2600);
+
+    waitForReady();
+    return () => {
+      canceled = true;
+      window.clearTimeout(safetyTimer);
+    };
+  }, []);
+
 
   const mainAnimation = useMemo(() => {
     if (!introRevealed) {
@@ -37,6 +106,7 @@ export default function Home() {
       <MobileMenu open={mobileMenuOpen} onClose={closeMobileMenu} triggerRef={menuToggleRef} />
       {!introComplete && (
         <EntranceOnboard
+          ready={progressReady}
           onReveal={() => setIntroRevealed(true)}
           onComplete={() => setIntroComplete(true)}
           onSkip={() => {
@@ -51,6 +121,8 @@ export default function Home() {
           mobileOpen={mobileMenuOpen}
           onToggleMobileMenu={toggleMobileMenu}
           menuToggleRef={menuToggleRef}
+          progress={progressValue}
+          progressVisible={!progressReady}
         />
         <div
           id="spotlight-portal-root"

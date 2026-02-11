@@ -7,9 +7,10 @@ type EntranceOnboardProps = {
   onReveal: () => void;
   onComplete: () => void;
   onSkip: () => void;
+  ready?: boolean;
 };
 
-export default function EntranceOnboard({ onReveal, onComplete, onSkip }: EntranceOnboardProps) {
+export default function EntranceOnboard({ onReveal, onComplete, onSkip, ready = false }: EntranceOnboardProps) {
   const reduceMotion = useReducedMotion();
   const overlayControls = useAnimation();
   const cellControls = useAnimation();
@@ -37,6 +38,7 @@ export default function EntranceOnboard({ onReveal, onComplete, onSkip }: Entran
   };
 
   useEffect(() => {
+    if (!ready) return;
     if (reduceMotion) {
       onReveal();
       onComplete();
@@ -65,7 +67,7 @@ export default function EntranceOnboard({ onReveal, onComplete, onSkip }: Entran
       cellControls.stop();
       overlayControls.stop();
     };
-  }, [cellControls, overlayControls, onComplete, onReveal, reduceMotion]);
+  }, [cellControls, overlayControls, onComplete, onReveal, reduceMotion, ready]);
 
   const handleSkip = () => {
     cellControls.stop();
