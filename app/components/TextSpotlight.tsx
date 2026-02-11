@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
+import { useResolvedTailwindColors } from "../../lib/useResolvedTailwindColors";
 
 interface TextSpotlightProps {
   text: string;
@@ -15,23 +16,14 @@ type ColorStop = {
   isClass?: boolean;
 };
 
-const isTailwindClass = (value: string) => value.includes("bg-") || value.includes("text-");
-
-const resolveComputedColor = (el: HTMLSpanElement | null, fallback: string, mode: "color" | "background") => {
-  if (!el) return fallback;
-  const styles = getComputedStyle(el);
-  return mode === "background" ? styles.backgroundColor : styles.color;
-};
-
 export default function TextSpotlight({
   text,
   className = "",
   colors,
   size = 300,
-  smoothing = 0.16,
+  smoothing = 0.03,
 }: TextSpotlightProps) {
   const ref = useRef<HTMLSpanElement | null>(null);
-  const swatchRefs = useRef<Array<HTMLSpanElement | null>>([]);
 
   const normalizedColors = useMemo<ColorStop[]>(() => {
     if (colors && colors.length > 0) return colors;
@@ -42,19 +34,11 @@ export default function TextSpotlight({
     ];
   }, [colors]);
 
-  const [resolved, setResolved] = useState<string[]>(
-    normalizedColors.map(c => c.color)
+  const colorTokens = useMemo(
+    () => normalizedColors.map(color => ({ color: color.color, isClass: color.isClass })),
+    [normalizedColors]
   );
-
-  useLayoutEffect(() => {
-    const next = normalizedColors.map((c, i) => {
-      const usesClass = c.isClass ?? isTailwindClass(c.color);
-      if (!usesClass) return c.color;
-      const mode = c.color.includes("bg-") ? "background" : "color";
-      return resolveComputedColor(swatchRefs.current[i], c.color, mode);
-    });
-    setResolved(next);
-  }, [normalizedColors]);
+  const { resolvedColors, swatches } = useResolvedTailwindColors(colorTokens);
 
   useEffect(() => {
     const el = ref.current;
@@ -92,7 +76,7 @@ export default function TextSpotlight({
 
       const used = effectiveSize ?? 220;
       const stops = normalizedColors
-        .map((c, i) => `${resolved[i] ?? c.color} ${c.percent}`)
+        .map((c, i) => `${resolvedColors[i] ?? c.color} ${c.percent}`)
         .join(", ");
       const grad = `radial-gradient(circle ${used}px at ${currentX}px ${currentY}px, ${stops})`;
       el.style.backgroundImage = grad;
@@ -113,24 +97,19 @@ export default function TextSpotlight({
       window.removeEventListener("pointermove", onPointer);
       window.removeEventListener("mousemove", onMouse);
     };
-  }, [normalizedColors, resolved, size, smoothing]);
+  }, [normalizedColors, resolvedColors, size, smoothing]);
 
   return (
     <span className="relative inline-flex">
-      {normalizedColors.map((c, i) => {
-        const usesClass = c.isClass ?? isTailwindClass(c.color);
-        return (
-          <span
-            key={`${c.color}-${i}`}
-            ref={el => {
-              swatchRefs.current[i] = el;
-            }}
-            className={`${usesClass ? c.color : ""} sr-only`}
-            style={!usesClass ? { color: c.color } : undefined}
-            aria-hidden="true"
-          />
-        );
-      })}
+      {swatches.map(swatch => (
+        <span
+          key={swatch.key}
+          ref={swatch.setRef}
+          className={`${swatch.className} sr-only`}
+          style={swatch.style}
+          aria-hidden="true"
+        />
+      ))}
       <span ref={ref} className={className} aria-hidden={false}>
         {text}
       </span>

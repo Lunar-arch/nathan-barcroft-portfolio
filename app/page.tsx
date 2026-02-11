@@ -52,9 +52,13 @@ export default function Home() {
           onToggleMobileMenu={toggleMobileMenu}
           menuToggleRef={menuToggleRef}
         />
+        <div
+          id="spotlight-portal-root"
+          className="pointer-events-none absolute inset-0 z-10"
+        />
         <motion.main
           id="main-content"
-          className="relative z-10 w-full max-w-5xl md:px-12 lg:px-6 px-6 py-24"
+          className="relative z-20 w-full max-w-5xl md:px-12 lg:px-6 px-6 py-24"
           tabIndex={-1}
           inert={!introRevealed}
           aria-hidden={!introRevealed}
@@ -94,6 +98,7 @@ export default function Home() {
             </div>
           </section>
         </motion.main>
+        <div className="absolute z-10 inset-0 backdrop-blur-[48px]" />
       </div>
     </>
   );
