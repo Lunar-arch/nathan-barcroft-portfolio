@@ -2,12 +2,13 @@
 
 import React from "react";
 import SpotlightButton from "./SpotlightButton";
+import { ChevronDown } from "lucide-react";
 
 export default function CTAs() {
   return (
     <div className="w-full flex gap-3 flex-row items-center">
       <SpotlightButton
-        className="flex w-1/2 h-12 items-center justify-center rounded-full bg-foreground hover:bg-foreground-secondary/80 px-6 text-sm font-semibold text-background transition-all hover:opacity-95"
+        className="flex group/view-btn flex-row w-1/2 h-12 gap-2 items-center justify-between rounded-full bg-foreground hover:bg-foreground-secondary/80 px-6 text-sm font-semibold text-background transition-all hover:opacity-95"
         spotlightColor="bg-indigo-600/30"
         hoverOpacity={0.6}
         focusOpacity={0.8}
@@ -17,7 +18,8 @@ export default function CTAs() {
         haloRadius={300}
         haloColor="bg-indigo-600/20"
       >
-        View my work
+        <p>View my work</p>
+        <ChevronDown size={20} className="group-hover/view-btn:scale-120 duration-300 ease-in-out transition-transform"/>
       </SpotlightButton>
 
       <div className="w-1/2">

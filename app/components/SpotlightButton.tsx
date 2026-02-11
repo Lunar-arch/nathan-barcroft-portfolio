@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useResolvedTailwindColors } from "../../lib/useResolvedTailwindColors";
+import { cn } from '@/lib/utils'
 
 interface Position {
   x: number;
@@ -186,7 +187,7 @@ export default function SpotlightButton({
       onBlur={handleBlur}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`relative overflow-hidden cursor-pointer ${className}`}
+      className={cn("relative overflow-hidden cursor-pointer", className)}
       type={rest.type ?? "button"}
     >
       {swatches.map(swatch => (
@@ -204,7 +205,7 @@ export default function SpotlightButton({
         style={bgStyle}
         className="absolute inset-0"
       />
-      <span className="relative z-10">{children}</span>
+      <span className="contents">{children}</span>
       {portalNode &&
         createPortal(
           <span aria-hidden="true" style={haloStyle} />,
