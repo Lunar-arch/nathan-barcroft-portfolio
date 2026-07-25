@@ -5,7 +5,8 @@
   --background-secondary: oklch(0.7418 0.0279 315.53);
   --foreground: oklch(0.2096 0.0371 290.05);
   --foreground-secondary: oklch(0.3096 0.0371 290.05);
-  --accent: oklch(0.8591 0.0279 315.53);
+  --accent: oklch(0.55 0.22 277);
+  --success: oklch(71.304% 0.13107 136.492);
 }
 
 @theme inline {
@@ -17,6 +18,7 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --default-transition-duration: 300ms;
+  --color-success: var(--success);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -25,7 +27,7 @@
   --background-secondary: oklch(0.3096 0.0371 290.05);
   --foreground: oklch(0.9418 0.0279 315.53);
   --foreground-secondary: oklch(0.7418 0.0279 315.53);
-  --accent: oklch(0.2786 0.0579 289.25);
+  --accent: oklch(39.535% 0.04228 280.716);
   }
 }
 

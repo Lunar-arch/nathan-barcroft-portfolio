@@ -2,8 +2,8 @@
 
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useResolvedTailwindColors } from "../../lib/useResolvedTailwindColors";
-import { cn } from '@/lib/utils'
+import { useResolvedTailwindColors } from "@/lib/useResolvedTailwindColors";
+import { cn } from "@/lib/utils";
 
 interface Position {
   x: number;
@@ -204,7 +204,7 @@ export default function SpotlightButton({
       className={cn("relative overflow-hidden cursor-pointer", className)}
       type={rest.type ?? "button"}
     >
-      {swatches.map(swatch => (
+      {swatches.map((swatch) => (
         <span
           key={swatch.key}
           ref={swatch.setRef}

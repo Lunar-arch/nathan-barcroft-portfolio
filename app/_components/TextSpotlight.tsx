@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useLayoutEffect, useMemo, useRef } from "react";
-import { useResolvedTailwindColors } from "../../lib/useResolvedTailwindColors";
+import { useResolvedTailwindColors } from "@/lib/useResolvedTailwindColors";
 
 interface TextSpotlightProps {
   text: string;
@@ -35,7 +35,7 @@ export default function TextSpotlight({
   }, [colors]);
 
   const colorTokens = useMemo(
-    () => normalizedColors.map(color => ({ color: color.color, isClass: color.isClass })),
+    () => normalizedColors.map((color) => ({ color: color.color, isClass: color.isClass })),
     [normalizedColors]
   );
   const { resolvedColors, swatches } = useResolvedTailwindColors(colorTokens);
@@ -116,7 +116,7 @@ export default function TextSpotlight({
 
   return (
     <span className="relative inline-flex">
-      {swatches.map(swatch => (
+      {swatches.map((swatch) => (
         <span
           key={swatch.key}
           ref={swatch.setRef}

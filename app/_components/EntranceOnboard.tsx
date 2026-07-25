@@ -10,7 +10,12 @@ type EntranceOnboardProps = {
   ready?: boolean;
 };
 
-export default function EntranceOnboard({ onReveal, onComplete, onSkip, ready = false }: EntranceOnboardProps) {
+export default function EntranceOnboard({
+  onReveal,
+  onComplete,
+  onSkip,
+  ready = false,
+}: EntranceOnboardProps) {
   const reduceMotion = useReducedMotion();
   const overlayControls = useAnimation();
   const cellControls = useAnimation();
@@ -47,7 +52,7 @@ export default function EntranceOnboard({ onReveal, onComplete, onSkip, ready = 
     }
 
     let canceled = false;
-    const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
     const run = async () => {
       await wait(1020);
@@ -96,7 +101,7 @@ export default function EntranceOnboard({ onReveal, onComplete, onSkip, ready = 
         Skip intro
       </button>
       <div className="absolute inset-0 grid grid-cols-7 grid-rows-7">
-        {cells.map(i => (
+        {cells.map((i) => (
           <motion.div
             key={i}
             className="w-full h-full"

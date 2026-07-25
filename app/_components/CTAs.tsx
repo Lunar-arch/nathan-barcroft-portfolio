@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import SpotlightButton from "./SpotlightButton";
+import Link from "next/link";
+import SpotlightButton from "@/app/_components/SpotlightButton";
 import { ChevronDown } from "lucide-react";
 
 export default function CTAs() {
@@ -23,18 +24,19 @@ export default function CTAs() {
       </SpotlightButton>
 
       <div className="w-1/2">
-        <SpotlightButton
-          className="flex not-md:w-full h-12 items-center justify-center rounded-full border border-foreground/20 px-6 text-sm font-medium transition-colors hover:bg-background-secondary"
-          spotlightColor="bg-indigo-600/30"
-          hoverOpacity={0.7}
-          focusOpacity={0.95}
-          radius={160}
-          aria-label="Get in touch"
-          haloColor="bg-indigo-600/20"
-
-        >
-          Get in touch
-        </SpotlightButton>
+        <Link href="/freelance" className="not-md:w-full block">
+          <SpotlightButton
+            className="flex not-md:w-full h-12 items-center justify-center rounded-full border border-foreground/20 px-6 text-sm font-medium transition-colors hover:bg-background-secondary"
+            spotlightColor="bg-indigo-600/30"
+            hoverOpacity={0.7}
+            focusOpacity={0.95}
+            radius={160}
+            aria-label="Hire me — view freelance pricing"
+            haloColor="bg-indigo-600/20"
+          >
+            Hire me
+          </SpotlightButton>
+        </Link>
       </div>
     </div>
   );
